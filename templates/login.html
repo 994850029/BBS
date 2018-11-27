@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <script src="/static/js/jquery-3.3.1.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <h1>登录</h1>
+        <form>
+            <div class="form-group">
+                <label for="name">用户名:</label>
+                <input type="text" id="name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="pwd">密码:</label>
+                <input type="password" id="pwd" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="yzm">验证码</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="text" id="yzm" class="form-control">
+                    </div>
+                    <img src="/get_img/" class="col-md-4">
+                    <div class="col-md-2">
+                        <a href="/login/">看不清换一张</a>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="btn">登录</button>
+        </form>
+    </div>
+</div>
+</body>
+<script>
+    $('#btn').click(function () {
+        var token = $.cookie('csrftoken');
+        var dic = {'name': $('#name').val(), 'pwd': $('#pwd').val(),'yzm':$('#yzm').val()};
+        $.ajax({
+            url: '/login/',
+            headers: {'X-CSRFToken': token},
+            type: 'post',
+            data: JSON.stringify(dic),
+            contentType:'application/json',
+            async : false,
+            dataType:'json',
+            success: function (data) {
+                alert(data)
+            }
+        })
+    })
+</script>
+</html>
