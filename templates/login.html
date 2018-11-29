@@ -12,7 +12,6 @@
     <div class="col-md-6 col-md-offset-3">
         <h1>登录</h1>
         <form>
-            {% csrf_token %}
             <div class="form-group">
                 <label for="name">用户名:</label>
                 <input type="text" id="name" class="form-control">
@@ -30,8 +29,10 @@
                     <img src={% url 'get_img' %} class="col-md-4" id="img_yzm">
                 </div>
             </div>
-            <button class="btn btn-primary" id="btn">登录</button>
         </form>
+
+        <button class="btn btn-primary" id="btn">登录</button>
+
     </div>
 </div>
 </body>
@@ -46,10 +47,14 @@
             {#data: JSON.stringify(dic),#}
             {#contentType:'application/json',#}
             data:dic,
-            async : false,
+            {#async : false,#}
             {#dataType:'json',#}
             success: function (data) {
-                alert(data)
+                if (data.status == 100){
+                    location.href = '/index/';
+                }else {
+                    alert(data.msg)
+                }
             }
         })
     });

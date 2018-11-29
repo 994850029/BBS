@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    {% load static %}
+    <script src={% static 'js/jquery-3.3.1.js' %}></script>
+    <script src="/static/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist/css/bootstrap.css">
+</head>
+<body>
+<div>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">博客</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">文章 <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#">随笔</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if request.user.is_authenticated %}
+                        <li><a href="#">{{ user.username }}</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true"
+                               aria-expanded="false">个人中心 <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="/setpwd/">修改密码</a></li>
+                                <li><a href="#">修改头像</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="/logout/">注销</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li><a href="/login/">登录</a></li>
+                        <li><a href="/register/">注册</a></li>
+                    {% endif %}
+
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+</div>
+<div class="row">
+    <div class="col-md-2">
+        <div class="panel panel-danger">
+            <div class="panel-heading">广告页</div>
+            <div class="panel-body">
+                <p>请联系:110</p>
+            </div>
+        </div>
+        <div class="panel panel-warning">
+            <div class="panel-heading">广告页</div>
+            <div class="panel-body"><p>请联系:110</p></div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        {% for article in articles %}
+            <div class="media">
+                <div class="media-left media-middle">
+                    <a href="#">
+                        <img class="media-object" src="{{ article.blog.userinfo.avatar }}"
+                             alt="..."
+                             style="width: 60px ;height: 60px;">
+                    </a>
+                </div>
+                <div class="media-body">
+                    <h4 class="media-heading">{{ article.title }}</h4>
+                    {{ article.desc }}
+                </div>
+                <div style="margin-top: 10px " class="article_bottom">
+                    <span>作者:{{ article.blog.userinfo.username }}&nbsp;</span>
+                    <span>发布时间:{{ article.create_time|date:'Y-m-d H-i-s' }}&nbsp;</span>
+                    <span class="glyphicon glyphicon-comment">评论({{ article.commit_num }})</span>
+                    <span class="glyphicon glyphicon-thumbs-up">点赞({{ article.up_num }})</span>
+                </div>
+            </div>
+        {% endfor %}
+
+
+    </div>
+    <div class="col-md-3">
+        <div class="panel panel-danger">
+            <div class="panel-heading">广告页</div>
+            <div class="panel-body">
+                <p>请联系:110</p>
+            </div>
+        </div>
+        <div class="panel panel-warning">
+            <div class="panel-heading">广告页</div>
+            <div class="panel-body"><p>请联系:110</p></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

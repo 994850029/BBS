@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>修改密码</title>
+    <script src="/static/js/jquery-3.3.1.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="row">
+    <div class="col-md-offset-3 col-md-6">
+        <h2>修改密码</h2>
+        <div class="form-group">
+            <label for="old_pwd">请输入旧密码:</label>
+            <input type="password" id="old_pwd" class="form-control">
+            <p id="old_pwd_error" class="error pull-right" style="color: red">&nbsp;</p>
+        </div>
+        {% for form in forms %}
+            <p><label for="{{ form.auto_id }}">{{ form.label }}</label></p>
+
+            <p>{{ form }}</p>
+            <p id="{{ form.name }}" class="error pull-right" style="color: red">&nbsp;</p>
+        {% endfor %}
+
+        <button class="btn btn-primary" id="btn">确认修改</button>
+    </div>
+</div>
+</body>
+<script>
+    $('#btn').click(function () {
+        var dic = {
+            'old_password': $('#old_pwd').val(),
+            'new_password': $('#id_new_password').val(),
+            're_new_password': $('#id_re_new_password').val(),
+            'csrfmiddlewaretoken': '{{csrf_token}}'
+        };
+        $.ajax({
+            url: '/setpwd/',
+            type: 'post',
+            data: dic,
+            success: function (data) {
+                if (data.status == 100) {
+                    location.href = '/login/';
+                }else if (data.status2 == 102){
+                    $('#old_pwd_error').text(data.msg2)
+                }
+                else{
+                    $('.error').text(' ');
+                    $('.form-control').attr('style', ' ');
+                    $.each(data.msg, function (k, v) {
+                        $('#' + k).text(v);
+                        $('#id_' + k).attr('style', 'border-color: red');
+                    });
+                    $('#re_new_password').text(data.msg.__all__)
+                }
+
+            }
+        })
+
+    })
+
+</script>
+</html>

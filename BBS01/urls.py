@@ -22,4 +22,9 @@ urlpatterns = [
     url(r'get_img/',views.get_img,name='get_img'),
     url(r'^register/',views.register),
     url(r'^user_blur/',views.user_blur),
+    url(r'^index/',views.index),
+    url(r'^$',views.index),
+    url(r'^logout/$',views.user_logout),
+    url(r'^setpwd/',views.set_pwd),
+    # url(r'^header_img/(\d+)$',views.header_img,name='header_img'),
 ]

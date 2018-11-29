@@ -79,16 +79,17 @@
             contentType: false,
             data: formdata,
             success: function (data) {
-                console.log(data);
                 if (data['status'] == 100) {
                     location.href = '/login/'
                 } else {
                     $('.error').text(' ');
                     $('.form-control').attr('style',' ');
+                    $('#res').text(' ')
                     $.each(data.msg,function (k,v) {
                         $('#'+k).text(v);
                         $('#id_'+k).attr('style','border-color: red');
                     });
+                    $('#res').text(data.msg.__all__)
 
                 }
             }
@@ -104,7 +105,7 @@
                 $('#username').text(' ');
                 $('#id_username').attr('style',' ');
                 if (data.status == 101){
-                    $('#username').text(data.msg)
+                    $('#username').text(data.msg);
                     $('#id_username').attr('style','border-color: red')
                 }
 
