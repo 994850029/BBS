@@ -37,7 +37,6 @@ def get_img(request):
         request.session['count'] = 1
     else:
         request.session['count'] += 1
-
     img = Image.new('RGB', (300, 30), color=common.get_random_color())
     font = ImageFont.truetype(font='static/font/txt.TTF', size=24)
     img_draw = ImageDraw.Draw(img)
@@ -77,3 +76,12 @@ def register(request):
             response['msg'] = user.errors
             # print(user.errors)
         return JsonResponse(response)
+
+def user_blur(request):
+    response = {'status':100,'msg':None}
+    username = request.POST.get('username')
+    user = models.UserInfo.objects.filter(username=username).first()
+    if user:
+        response['status'] = 101
+        response['msg'] = '用户名已存在!'
+    return JsonResponse(response)

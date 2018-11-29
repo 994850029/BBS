@@ -21,4 +21,5 @@ urlpatterns = [
     url(r'^login/',views.login),
     url(r'get_img/',views.get_img,name='get_img'),
     url(r'^register/',views.register),
+    url(r'^user_blur/',views.user_blur),
 ]

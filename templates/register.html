@@ -37,7 +37,7 @@
                 <p><label for="{{ form.auto_id }}">{{ form.label }}</label></p>
 
                 <p>{{ form }}</p>
-                <p id="{{ form.name }}">&nbsp;</p>
+                <p id="{{ form.name }}" class="error pull-right" style="color: red">&nbsp;</p>
             {% endfor %}
             <p>
                 <label for="img_file" class="col-md-8" style="padding: 0">
@@ -46,7 +46,7 @@
                 </label>
             </p>
 
-            <input type="file" id="img_file">
+            <input type="file" id="img_file" accept="image/*">
 
             <button type="button" class="btn btn-success col-md-5" id="btn" style="margin-bottom: 16px">注册</button><p id="res" class="col-md-8"></p>
         </form>
@@ -83,13 +83,33 @@
                 if (data['status'] == 100) {
                     location.href = '/login/'
                 } else {
-                    $('#username').text(data['msg'].username);
-                    $('#password').text(data['msg'].password);
-                    $('#re_password').text(data['msg'].re_password);
-                    $('#phone').text(data['msg'].phone);
-                    $('#res').text(data['msg'].__all__);
+                    $('.error').text(' ');
+                    $('.form-control').attr('style',' ');
+                    $.each(data.msg,function (k,v) {
+                        $('#'+k).text(v);
+                        $('#id_'+k).attr('style','border-color: red');
+                    });
+
                 }
             }
+        })
+
+    });
+    $('#id_username').blur(function () {
+        $.ajax({
+            url:'/user_blur/',
+            type:'post',
+            data: {'username':$(this).val(),'csrfmiddlewaretoken':'{{ csrf_token }}'},
+            success:function (data) {
+                $('#username').text(' ');
+                $('#id_username').attr('style',' ');
+                if (data.status == 101){
+                    $('#username').text(data.msg)
+                    $('#id_username').attr('style','border-color: red')
+                }
+
+            }
+
         })
 
     })
