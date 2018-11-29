@@ -19,5 +19,6 @@ from blog import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/',views.login),
-    url(r'get_img',views.get_img)
+    url(r'get_img/',views.get_img,name='get_img'),
+    url(r'^register/',views.register),
 ]

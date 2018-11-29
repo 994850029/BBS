@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    {% load static %}
+    <script src={% static 'js/jquery-3.3.1.js' %}></script>
+    <script src="/static/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist/css/bootstrap.css">
+    <style>
+        img {
+            height: 80px;
+            width: 80px;
+            margin: 0;
+            padding: 0;
+        }
+
+        #img_file {
+            display: none;
+        }
+
+        img {
+            margin: 0;
+            padding: 0;
+        }
+
+    </style>
+</head>
+<body>
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <h2>用户注册</h2>
+        <form id="form">
+
+            {% csrf_token %}
+            {% for form in forms %}
+                <p><label for="{{ form.auto_id }}">{{ form.label }}</label></p>
+
+                <p>{{ form }}</p>
+                <p id="{{ form.name }}">&nbsp;</p>
+            {% endfor %}
+            <p>
+                <label for="img_file" class="col-md-8" style="padding: 0">
+                    上传头像
+                    <img src="/static/img/default.png" alt="" id="img_up">
+                </label>
+            </p>
+
+            <input type="file" id="img_file">
+
+            <button type="button" class="btn btn-success col-md-5" id="btn" style="margin-bottom: 16px">注册</button><p id="res" class="col-md-8"></p>
+        </form>
+
+    </div>
+</div>
+</body>
+<script>
+    $('#img_file').change(function () {
+        var file = $('#img_file')[0].files[0];
+        var filereader = new FileReader();
+        filereader.readAsDataURL(file);
+        filereader.onload = function () {
+            $('#img_up').attr('src', filereader.result)
+
+        }
+
+    });
+    $('#btn').click(function () {
+        var formdata = new FormData();
+        var arr = $('#form').serializeArray();
+        $.each(arr, function (k, v) {
+            formdata.append(v.name, v.value)
+        });
+        formdata.append('img', $('#img_file')[0].files[0]);
+        $.ajax({
+            url: '/register/',
+            type: 'post',
+            processData: false,
+            contentType: false,
+            data: formdata,
+            success: function (data) {
+                console.log(data);
+                if (data['status'] == 100) {
+                    location.href = '/login/'
+                } else {
+                    $('#username').text(data['msg'].username);
+                    $('#password').text(data['msg'].password);
+                    $('#re_password').text(data['msg'].re_password);
+                    $('#phone').text(data['msg'].phone);
+                    $('#res').text(data['msg'].__all__);
+                }
+            }
+        })
+
+    })
+</script>
+</html>
