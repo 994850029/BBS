@@ -13,7 +13,6 @@ from django.contrib.auth.decorators import login_required
 # Create your views here.
 def login(request):
     if request.method == 'GET':
-        print(request.session.get('yzm'))
         return render(request, 'login.html')
     if request.method == 'POST':
         # blog = models.Blog.objects.create(site_name='test',theme='test')
@@ -124,13 +123,14 @@ def set_pwd(request):
         name = request.user.username
         pwd_dic = request.POST
         old_pwd = pwd_dic.get('old_password')
-        user = auth.authenticate(username=name, password=old_pwd)
+        user = request.user
+        userpwd = user.check_password(old_pwd)
         pwd = common.SetPwdForm(pwd_dic)
-        if user and pwd.is_valid():
+        if userpwd and pwd.is_valid():
             user.set_password(pwd.cleaned_data.get('new_password'))
             user.save()
             auth.logout(request)
-        if not user:
+        if not userpwd:
             response['status2'] = 102
             response['msg2'] = '旧密码错误!'
 
@@ -139,3 +139,14 @@ def set_pwd(request):
             response['msg'] = pwd.errors
 
         return JsonResponse(response)
+
+@login_required
+def set_re_password(request):
+    response = {'status':100,'msg':None}
+    old_password = request.POST.get('old_password')
+    user = request.user
+    user_pwd= user.check_password(old_password)
+    if not user_pwd:
+        response['status'] = 101
+        response['msg'] = '旧密码错误!'
+    return JsonResponse(response)

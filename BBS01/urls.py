@@ -26,5 +26,6 @@ urlpatterns = [
     url(r'^$',views.index),
     url(r'^logout/$',views.user_logout),
     url(r'^setpwd/',views.set_pwd),
+    url(r'^set_re_password/',views.set_re_password),
     # url(r'^header_img/(\d+)$',views.header_img,name='header_img'),
 ]

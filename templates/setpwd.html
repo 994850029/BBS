@@ -57,7 +57,25 @@
             }
         })
 
-    })
+    });
+    $('#old_pwd').blur(function () {
+        var dic = {'old_password':$('#old_pwd').val(),
+                    'csrfmiddlewaretoken': '{{csrf_token}}'};
+        $.ajax({
+            url:'/set_re_password/',
+            type:'post',
+            data: dic,
+            success:function (data) {
+                 $('#old_pwd_error').text(' ')
+                if (data.status == 101){
+                    console.log(data.msg);
 
+                    $('#old_pwd_error').text(data.msg)
+                }
+
+            }
+        })
+
+    })
 </script>
 </html>
