@@ -16,6 +16,8 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from blog import views
+from django.views.static import serve
+from BBS01 import settings
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/',views.login),
@@ -26,6 +28,7 @@ urlpatterns = [
     url(r'^$',views.index),
     url(r'^logout/$',views.user_logout),
     url(r'^setpwd/',views.set_pwd),
+    url(r'^img_update/',views.img_update),
     url(r'^set_re_password/',views.set_re_password),
-    # url(r'^header_img/(\d+)$',views.header_img,name='header_img'),
+    url(r'^media/(?P<path>.*)',serve,{'document_root':settings.MEDIA_ROOT})
 ]

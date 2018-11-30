@@ -61,9 +61,7 @@
         filereader.readAsDataURL(file);
         filereader.onload = function () {
             $('#img_up').attr('src', filereader.result)
-
         }
-
     });
     $('#btn').click(function () {
         var formdata = new FormData();

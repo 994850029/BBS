@@ -42,18 +42,27 @@ def get_img(request):
         request.session['count'] = 1
     else:
         request.session['count'] += 1
-    img = Image.new('RGB', (300, 30), color=common.get_random_color())
+    img = Image.new('RGB', (300, 30), (255, 255, 255))
     font = ImageFont.truetype(font='static/font/txt.TTF', size=24)
     img_draw = ImageDraw.Draw(img)
     font_content = common.get_random_yzm(5)
     request.session['yzm'] = font_content
     img_draw.text((100, 0), font_content, common.get_random_color(), font=font)
-    common.add_dianxiang(300, 30, img_draw, int(5 / request.session['count']), int(60 / (request.session['count'] + 2)))
+    common.add_dianxiang(300, 30, img_draw, int(5 / request.session['count']), int(60 / (request.session['count'])))
     f = BytesIO()
     img.save(f, 'png')
     data = f.getvalue()
 
     return HttpResponse(data)
+
+
+def get_img_test(request):
+    img = Image.new('RGB', (300, 30), (255, 255, 255))
+    font = ImageFont.truetype(font='static/font/txt.TTF', size=24)
+    img_draw = ImageDraw.Draw(img)
+    font_content = common.get_random_yzm(5)
+    img_draw.text((100, 0), font_content, common.get_random_color(), font=font)
+    common.add_dianxiang(300, 30, img_draw, 5, 50)
 
 
 def register(request):
@@ -104,15 +113,6 @@ def user_logout(request):
     return redirect('/index/')
 
 
-# def header_img(request,id):
-#     img_path = models.UserInfo.objects.filter(blog__article__id=id).first().avatar
-#
-#     if str(img_path).startswith('avatar'):
-#         img = Image.new('RGB', (300, 30), color=common.get_random_color())
-#         return HttpResponse(img)
-#     else:
-#         return HttpResponse(str(img_path))
-
 @login_required
 def set_pwd(request):
     if request.method == 'GET':
@@ -137,16 +137,30 @@ def set_pwd(request):
         if not pwd.is_valid():
             response['status'] = 101
             response['msg'] = pwd.errors
-
         return JsonResponse(response)
+
 
 @login_required
 def set_re_password(request):
-    response = {'status':100,'msg':None}
+    response = {'status': 100, 'msg': None}
     old_password = request.POST.get('old_password')
     user = request.user
-    user_pwd= user.check_password(old_password)
+    user_pwd = user.check_password(old_password)
     if not user_pwd:
         response['status'] = 101
         response['msg'] = '旧密码错误!'
     return JsonResponse(response)
+
+
+@login_required
+def img_update(request):
+    file = request.FILES.get('img')
+    if file:
+        hs = hashlib.md5()
+        time = datetime.datetime.now()
+        hs.update(str(time).encode('utf-8'))
+        file.name = hs.hexdigest() + '.png'
+    user = models.UserInfo.objects.filter(id=request.user.id).first()
+    user.avatar = file
+    user.save()
+    return JsonResponse({'sa': 'afd'})

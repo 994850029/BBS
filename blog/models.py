@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractUser
 class UserInfo(AbstractUser):
     id = models.AutoField(primary_key=True)
     phone = models.CharField(max_length=16)
-    avatar = models.FileField(upload_to='avatar/', default='/static/img/default.png')
+    avatar = models.FileField(upload_to='avatar/', default='avatar/default.png')
     create_date = models.DateTimeField(auto_now_add=True)
     blog = models.OneToOneField(to='Blog', to_field='id',null=True,blank=True)
     class Meta:
