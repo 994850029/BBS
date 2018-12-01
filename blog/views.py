@@ -164,3 +164,6 @@ def img_update(request):
     user.avatar = file
     user.save()
     return JsonResponse({'sa': 'afd'})
+
+def error(request):
+    return render(request,'error.html')
