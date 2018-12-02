@@ -1,0 +1,10 @@
+.head{
+    height: 60px;
+    background-color: #2aabd2;
+    margin-bottom: 20px;
+}
+.head_p{
+    text-align: center;
+    line-height: 60px;
+    font-size: 25px;
+}

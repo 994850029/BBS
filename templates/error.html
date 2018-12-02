@@ -1,13 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <title>404错误</title>
+    {% load static %}
+    <script src={% static 'js/jquery-3.3.1.js' %}></script>
+    <script src="/static/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist/css/bootstrap.css">
 </head>
 <body>
+<div class="row" style="margin-top: 50px">
+    <div class="col-md-offset-3 col-lg-6">
+        <h2>404</h2>
+        <p class="d">请确认您输入的网址是否正确，如果问题持续存在，请发邮件至xxxxx与我们联系。</p>
+        <p><b>404.</b> 抱歉! 您访问的资源不存在!</p>
+        <p><a href="/index/">返回网站首页</a></p>
 
-<p class="d">请确认您输入的网址是否正确，如果问题持续存在，请发邮件至contact@cnblogs.com与我们联系。</p>
-<p><b>404.</b> 抱歉! 您访问的资源不存在!</p><p><a href="http://www.cnblogs.com/">返回网站首页</a></p>
+    </div>
+</div>
 
 
 </body>

@@ -8,6 +8,8 @@ from blog import models
 import datetime
 import hashlib
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
 
 
 # Create your views here.
@@ -165,5 +167,22 @@ def img_update(request):
     user.save()
     return JsonResponse({'sa': 'afd'})
 
+
 def error(request):
-    return render(request,'error.html')
+    return render(request, 'error.html')
+
+
+@login_required
+def user_blog(request, username):
+    user = models.UserInfo.objects.filter(username=username).first()
+    if not user:
+        return render(request, 'error.html')
+    blog = user.blog
+    category_num = models.Category.objects.filter(blog=blog).all().annotate(coun=Count('article__title')).values_list(
+        'title', 'coun')
+    tag_num = models.Tag.objects.filter(blog=blog).all().annotate(coun=Count('article__title')).values_list('title',
+                                                                                                            'coun')
+    y_m_num = models.Article.objects.all().filter(blog=blog).annotate(y_m=TruncMonth('create_time')).values(
+        'y_m').annotate(
+        coun=Count('y_m')).values_list('y_m', 'coun')
+    return render(request, 'user_blog.html', locals())

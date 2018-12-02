@@ -31,6 +31,5 @@ urlpatterns = [
     url(r'^img_update/',views.img_update),
     url(r'^set_re_password/',views.set_re_password),
     url(r'^media/(?P<path>.*)',serve,{'document_root':settings.MEDIA_ROOT}),
-
-    url(r'.*',views.error)
+    url(r'^(?P<username>[\w]+)', views.user_blog),
 ]
