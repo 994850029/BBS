@@ -10,7 +10,9 @@ import hashlib
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.db.models.functions import TruncMonth
-
+from django.db.models import F
+from django.db import transaction
+import json
 
 # Create your views here.
 def login(request):
@@ -172,17 +174,67 @@ def error(request):
     return render(request, 'error.html')
 
 
-@login_required
-def user_blog(request, username):
+def user_blog(request, username, *args, **kwargs):
     user = models.UserInfo.objects.filter(username=username).first()
     if not user:
         return render(request, 'error.html')
     blog = user.blog
+    article_list = blog.article_set.all()
+    if kwargs.get('condition') == 'category':
+        article_list = article_list.filter(category__id=kwargs.get('id'))
+    elif kwargs.get('condition') == 'tag':
+        article_list = article_list.filter(tag__id=kwargs.get('id'))
+    elif kwargs.get('condition') == 'archive':
+        time_list = kwargs.get('id').split('-')
+        article_list = article_list.filter(create_time__year=time_list[0], create_time__month=time_list[1])
     category_num = models.Category.objects.filter(blog=blog).all().annotate(coun=Count('article__title')).values_list(
-        'title', 'coun')
+        'title', 'coun','id')
     tag_num = models.Tag.objects.filter(blog=blog).all().annotate(coun=Count('article__title')).values_list('title',
-                                                                                                            'coun')
+                                                                                                            'coun',
+                                                                                                            'id')
     y_m_num = models.Article.objects.all().filter(blog=blog).annotate(y_m=TruncMonth('create_time')).values(
         'y_m').annotate(
         coun=Count('y_m')).values_list('y_m', 'coun')
     return render(request, 'user_blog.html', locals())
+
+def article_content(request,username,id):
+    username = username
+    user = models.UserInfo.objects.filter(username=username).first()
+    if not user:
+        return render(request,'error.html')
+    blog=user.blog
+    article = models.Article.objects.filter(id=id).first()
+    if not article:
+        return render(request,'error.html')
+    return render(request,'article_content.html',locals())
+
+def diggit(request):
+    dic = request.POST
+    response = {'status':100,'msg':None}
+    article_id = dic.get('article_id')
+    is_up = dic.get('is_up')
+    is_up = json.loads(is_up)
+    if request.user.is_authenticated():
+        user_cf = models.UpAndDown.objects.filter(user=request.user,article_id=article_id).first()
+        if user_cf:
+            response['msg'] ='无法多次点赞或者点踩哦!'
+            response['status'] = 101
+            return JsonResponse(response)
+        else:
+            with transaction.atomic():
+                models.UpAndDown.objects.create(user=request.user,article_id=article_id,is_up=is_up)
+                article =models.Article.objects.filter(id = article_id)
+            if is_up:
+                article.update(up_num = F('up_num')+1)
+                response['status'] = 100
+                response['msg'] = '您已成功点赞!'
+            else:
+                article.update(down_num=F('down_num') + 1)
+                response['status'] = 100
+                response['msg'] = '您已成功反对!'
+
+
+    else:
+        response['status']=101
+        response['msg'] = '请先登录!'
+    return JsonResponse(response)

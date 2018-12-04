@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ blog.userinfo.username }}-的个人博客</title>
+    {% load static %}
+    <script src={% static 'js/jquery-3.3.1.js' %}></script>
+    <script src="/static/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/{{ blog.theme }}">
+    <link rel="stylesheet" href="/static/css/mycss.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #update_img {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/index/">博客</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">文章 <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#">随笔</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if request.user.is_authenticated %}
+                        <li>
+                            <a href="/{{ request.user.username }}/"><img src="/media/{{ request.user.avatar }}"
+                                                                         style="height: 19px; width: 19px"></a>
+                        </li>
+                        <li>
+                            <a href="/{{ request.user.username }}/">{{ request.user.username }}</a>
+                        </li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-haspopup="true"
+                               aria-expanded="false">个人中心 <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="/setpwd/">修改密码</a></li>
+                                <li><a href="" data-toggle="modal" data-target="#myModal">修改头像</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="/logout/">注销</a></li>
+                            </ul>
+                        </li>
+                        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        <h4 class="modal-title" id="myModalLabel">修改头像</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <label for="update_img">
+                                            <p>点击修改头像</p>
+                                            <img id="change_img" src="/media/{{ request.user.avatar }}" alt=""
+                                                 style="width: 540px;height: 300px">
+                                        </label>
+
+                                        <input type="file" id="update_img">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                        <button type="button" class="btn btn-primary" id="btn_imgupdate">确认并保存</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% else %}
+                        <li><a href="/login/">登录</a></li>
+                        <li><a href="/register/">注册</a></li>
+                    {% endif %}
+
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+</div>
+<div class="head">
+
+    <p class="head_p">{{ blog.title }}</p>
+</div>
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-md-3">
+            {% load my_tag %}
+            {% left_fold username %}
+        </div>
+        <div class="col-md-9">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>

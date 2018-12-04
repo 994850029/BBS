@@ -31,7 +31,8 @@
                 <ul class="nav navbar-nav navbar-right">
                     {% if request.user.is_authenticated %}
                         <li>
-                            <a href="#"><img src="/media/{{ user.avatar }}" style="height: 19px; width: 19px"></a>
+                            <a href="/{{ user.username }}/"><img src="/media/{{ user.avatar }}"
+                                                                 style="height: 19px; width: 19px"></a>
                         </li>
                         <li>
                             <a href="/{{ user.username }}/">{{ user.username }}</a>
@@ -82,18 +83,42 @@
                     </a>
                 </div>
                 <div class="media-body">
-                    <h4 class="media-heading">{{ article.title }}</h4>
+                    <a href="/{{ article.blog.userinfo.username }}/article/{{ article.id }}"><h4
+                            class="media-heading">{{ article.title }}</h4></a>
                     {{ article.desc }}
                 </div>
                 <div style="margin-top: 10px " class="article_bottom">
-                    <span>作者:{{ article.blog.userinfo.username }}&nbsp;</span>
+                    <a href="/{{ user.username }}/"><span>作者:{{ article.blog.userinfo.username }}&nbsp;</span></a>
                     <span>发布时间:{{ article.create_time|date:'Y-m-d H-i-s' }}&nbsp;</span>
                     <span class="glyphicon glyphicon-comment">评论({{ article.commit_num }})</span>
                     <span class="glyphicon glyphicon-thumbs-up">点赞({{ article.up_num }})</span>
                 </div>
             </div>
         {% endfor %}
+        <div class="row">
+            <div class="col-md-offset-3 col-lg-6">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li>
+                            <a href="#" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="active"><a href="#">1</a></li>
+                        <li><a href="#">2</a></li>
+                        <li><a href="#">3</a></li>
+                        <li><a href="#">4</a></li>
+                        <li><a href="#">5</a></li>
+                        <li>
+                            <a href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
 
+        </div>
 
     </div>
     <div class="col-md-3">
@@ -150,13 +175,13 @@
         console.log(111);
         var file = $('#update_img')[0].files[0];
         var formdate = new FormData();
-        formdate.append('img',file);
-        formdate.append('csrfmiddlewaretoken','{{ csrf_token }}');
+        formdate.append('img', file);
+        formdate.append('csrfmiddlewaretoken', '{{ csrf_token }}');
         $.ajax({
             url: '/img_update/',
             type: 'post',
-            processData:false,
-            contentType:false,
+            processData: false,
+            contentType: false,
             data: formdate,
             success: function (data) {
                 location.href = '/index/'

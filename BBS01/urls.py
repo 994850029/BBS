@@ -18,18 +18,22 @@ from django.contrib import admin
 from blog import views
 from django.views.static import serve
 from BBS01 import settings
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^login/$',views.login),
-    url(r'get_img/',views.get_img,name='get_img'),
-    url(r'^register/$',views.register),
-    url(r'^user_blur/',views.user_blur),
-    url(r'^index/$',views.index),
-    url(r'^$',views.index),
-    url(r'^logout/$',views.user_logout),
-    url(r'^setpwd/$',views.set_pwd),
-    url(r'^img_update/',views.img_update),
-    url(r'^set_re_password/',views.set_re_password),
-    url(r'^media/(?P<path>.*)',serve,{'document_root':settings.MEDIA_ROOT}),
+    url(r'^login/$', views.login),
+    url(r'get_img/', views.get_img, name='get_img'),
+    url(r'^register/$', views.register),
+    url(r'^user_blur/', views.user_blur),
+    url(r'^index/$', views.index),
+    url(r'^$', views.index),
+    url(r'^logout/$', views.user_logout),
+    url(r'^setpwd/$', views.set_pwd),
+    url(r'^img_update/', views.img_update),
+    url(r'^set_re_password/', views.set_re_password),
+    url(r'^media/(?P<path>.*)', serve, {'document_root': settings.MEDIA_ROOT}),
+    url(r'^(?P<username>[\w]+)/(?P<condition>category|tag|archive)/(?P<id>.*)', views.user_blog),
+    url(r'^(?P<username>[\w]+)/article/(?P<id>\d+)',views.article_content),
+    url(r'^diggit/',views.diggit),
     url(r'^(?P<username>[\w]+)', views.user_blog),
 ]

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+    <p><h2 class="text-center">{{ article.title }}</h2></p>
+    <div>
+        {{ article.content|safe }}
+    </div>
+    <div id="div_digg">
+        <div class="diggit active">
+            <span class="diggnum" id="digg_count">{{ article.up_num }}</span>
+        </div>
+        <div class="buryit active">
+            <span class="burynum" id="bury_count">{{ article.down_num }}</span>
+        </div>
+        <div class="clear"></div>
+        <div class="diggword" id="digg_tips" style="color: red;"></div>
+    </div>
+    <script>
+        $('.active').click(function () {
+            var is_up = $(this).hasClass('diggit');
+            var obj = $(this).children('span');
+            $.ajax({
+                url: '/diggit/',
+                type: 'post',
+                data: {
+                    'is_up': is_up,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    'article_id':{{article.id}}
+                },
+                success:function (data) {
+                    $("#digg_tips").text(data.msg);
+                    if (data.status == 100){
+                       obj.text(Number(obj.text()) + 1)
+                    }
+
+                },
+
+            });
+            setTimeout(function(){
+                 $("#digg_tips").text(' ');
+                },3000)
+        })
+    </script>
+{% endblock %}
