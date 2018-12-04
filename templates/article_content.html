@@ -4,40 +4,148 @@
     <div>
         {{ article.content|safe }}
     </div>
-    <div id="div_digg">
-        <div class="diggit active">
-            <span class="diggnum" id="digg_count">{{ article.up_num }}</span>
+    <div class="clearfix">
+        <div id="div_digg">
+            <div class="diggit active">
+                <span class="diggnum" id="digg_count">{{ article.up_num }}</span>
+            </div>
+            <div class="buryit active">
+                <span class="burynum" id="bury_count">{{ article.down_num }}</span>
+            </div>
+            <div class="clear"></div>
+            <div class="diggword" id="digg_tips" style="color: red;"></div>
         </div>
-        <div class="buryit active">
-            <span class="burynum" id="bury_count">{{ article.down_num }}</span>
-        </div>
-        <div class="clear"></div>
-        <div class="diggword" id="digg_tips" style="color: red;"></div>
     </div>
+    <div>
+        <ul class="list-group content_ul">
+            {% for content in content_list %}
+
+                <li class="list-group-item">
+                    <p>
+                        <span>#{{ forloop.counter }}楼</span>
+                        <span>{{ content.commit_time|date:'Y-m-d H:i:s' }}</span>
+                        <span>评论者:{{ content.user.username }}</span>
+                        <span class="pull-right replay" username="{{ content.user.username }}" content_id='{{ content.id }}'><a>回复</a></span>
+                    </p>
+                    {% if content.parent %}
+                        <p class="well">@{{ content.parent.user.username }}</p>
+                    {% endif %}
+                    {{ content.content }}
+                </li>
+            {% endfor %}
+        </ul>
+
+
+    </div>
+    {% if request.user.is_authenticated %}
+        <div>
+            <p>发表评论</p>
+            <p>
+                昵称：<input type="text" id="tbCommentAuthor" class="author" disabled="disabled" size="50"
+                          value="{{ request.user.username }}">
+            </p>
+            <p>评论内容：</p>
+            <p>
+                <textarea name="" id="content" cols="60" rows="10">
+            </textarea>
+            </p>
+            <button class="btn btn-primary submit" id="btn">提交</button>
+
+
+        </div>
+    {% else %}
+        <p>您还没有登录,请先登录才能评论!</p>
+    {% endif %}
+
+    {#    点赞或者点踩的ajax#}
     <script>
         $('.active').click(function () {
             var is_up = $(this).hasClass('diggit');
             var obj = $(this).children('span');
             $.ajax({
-                url: '/diggit/',
+                url: '/up_and_down/',
                 type: 'post',
                 data: {
                     'is_up': is_up,
                     'csrfmiddlewaretoken': '{{ csrf_token }}',
                     'article_id':{{article.id}}
                 },
-                success:function (data) {
+                success: function (data) {
                     $("#digg_tips").text(data.msg);
-                    if (data.status == 100){
-                       obj.text(Number(obj.text()) + 1)
+                    if (data.status == 100) {
+                        obj.text(Number(obj.text()) + 1)
                     }
 
                 },
 
             });
-            setTimeout(function(){
-                 $("#digg_tips").text(' ');
-                },3000)
+            setTimeout(function () {
+                $("#digg_tips").text(' ');
+            }, 3000)
+        })
+    </script>
+    {#    评论的ajax#}
+    <script>
+        var parent_id = '';
+        $('#btn').click(function () {
+            var content = $('#content').val();
+            $('#content').val(' ');
+            if (parent_id) {
+                var index = content.indexOf('\n') + 1;
+                content = content.slice(index)
+
+            }
+            var dic = {
+                'article_id': '{{ article.id }}',
+                'content': content,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                'parent_id': parent_id
+            };
+            $.ajax({
+                url: '/commit/',
+                type: 'post',
+                data: dic,
+                success: function (data) {
+                    var time = data.time;
+                    var username = data.username;
+                    var content = data.content;
+                    var ss = '';
+                    if (parent_id){
+                        parent_id='';
+                        var parent_name=data.parent_name;
+                        ss=`
+                         <li class="list-group-item">
+                         <p>
+                            <span>${time}</span>
+                            <span>评论者:${username}</span>
+                        </p>
+                            <p class="well">@${parent_name }</p>
+                        ${content}
+                    </li>
+                        `
+                    }else {
+                        ss = `
+                    <li class="list-group-item">
+                        <p>
+                            <span>${time}</span>
+                            <span>评论者:${username}</span>
+                        </p>
+
+                       ${ content }
+                    </li>
+                    `;
+                    }
+
+                    $('.content_ul').append(ss)
+                }
+            })
+
+        });
+        $('.replay').click(function () {
+            parent_id = $(this).attr('content_id');
+            var username = $(this).attr('username');
+            $('#content').focus();
+            $('#content').val('@' + username + '\n');
         })
     </script>
 {% endblock %}

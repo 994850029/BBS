@@ -13,6 +13,7 @@ from django.db.models.functions import TruncMonth
 from django.db.models import F
 from django.db import transaction
 import json
+from django.core.paginator import Paginator
 
 # Create your views here.
 def login(request):
@@ -109,6 +110,26 @@ def user_blur(request):
 def index(request):
     if request.method == 'GET':
         articles = models.Article.objects.all().order_by('-create_time')
+
+        paginator = Paginator(articles,4)
+        try:
+            if int(request.GET.get('page')) not in range(1, paginator.num_pages + 1):
+                page_num = 1
+            else:
+                page_num = int(request.GET.get('page'))
+        except Exception as e:
+            page_num = 1
+        page_content = paginator.page(page_num)
+        if paginator.num_pages < 11:
+            page_count = paginator.page_range
+        else:
+            if page_num - 5 < 1:
+                page_count = range(1, 12)
+            elif page_num + 6 > paginator.num_pages:
+                page_count = range(paginator.num_pages - 10, paginator.num_pages + 1)
+            else:
+                page_count = range(page_num - 5, page_num + 6)
+
         return render(request, 'index.html', locals())
 
 
@@ -206,9 +227,11 @@ def article_content(request,username,id):
     article = models.Article.objects.filter(id=id).first()
     if not article:
         return render(request,'error.html')
+    content_list = models.Commit.objects.filter(article = article).all()
     return render(request,'article_content.html',locals())
 
-def diggit(request):
+@login_required
+def up_and_down(request):
     dic = request.POST
     response = {'status':100,'msg':None}
     article_id = dic.get('article_id')
@@ -232,9 +255,33 @@ def diggit(request):
                 article.update(down_num=F('down_num') + 1)
                 response['status'] = 100
                 response['msg'] = '您已成功反对!'
-
-
     else:
         response['status']=101
         response['msg'] = '请先登录!'
     return JsonResponse(response)
+
+@login_required
+def commit(request):
+    if request.is_ajax():
+        response = {'status': 100, 'msg': None}
+        if request.user.is_authenticated():
+            dic = request.POST
+            user = request.user
+            parent_id = dic.get('parent_id')
+            article_id = dic.get('article_id')
+            content = dic.get('content')
+            with transaction.atomic():
+                commit_obj = models.Commit.objects.create(content=content,article_id=article_id,parent_id=parent_id,user=user)
+                models.Article.objects.filter(id = article_id).update(commit_num = F('commit_num')+1)
+            response['time'] =commit_obj.commit_time.strftime('%Y-%m-%d %X')
+            response['content'] = commit_obj.content
+            response['username'] =commit_obj.user.username
+            response['msg'] = '评论成功!'
+            if parent_id:
+                # 如果是字评论,返回父评论的名字
+                response['parent_name'] = commit_obj.parent.user.username
+
+        else:
+            response['status'] = 101
+            response['msg'] = '您的请求非法'
+        return JsonResponse(response)

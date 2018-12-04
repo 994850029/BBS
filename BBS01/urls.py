@@ -34,6 +34,7 @@ urlpatterns = [
     url(r'^media/(?P<path>.*)', serve, {'document_root': settings.MEDIA_ROOT}),
     url(r'^(?P<username>[\w]+)/(?P<condition>category|tag|archive)/(?P<id>.*)', views.user_blog),
     url(r'^(?P<username>[\w]+)/article/(?P<id>\d+)',views.article_content),
-    url(r'^diggit/',views.diggit),
+    url(r'^up_and_down/',views.up_and_down),
+    url(r'^commit/',views.commit),
     url(r'^(?P<username>[\w]+)', views.user_blog),
 ]

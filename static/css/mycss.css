@@ -41,3 +41,17 @@
     font-size: 12px;
     color: gray;
 }
+
+input.author {
+    background-position: 3px -3px;
+}
+
+
+input.author{
+    background-image: url(/static/img/icon_form.gif);
+    background-repeat: no-repeat;
+    border: 1px solid #ccc;
+    padding: 4px 4px 4px 30px;
+    width: 300px;
+    font-size: 13px;
+}
