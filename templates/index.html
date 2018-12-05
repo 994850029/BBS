@@ -31,29 +31,32 @@
             <div class="panel-body"><p>请联系:110</p></div>
         </div>
     </div>
-    <div class="col-lg-7">
-        {% for article in page_content %}
-            <div class="media">
-                <div class="media-left media-middle">
-                    <a href="#">
-                        <img class="media-object" src="/media/{{ article.blog.userinfo.avatar }}"
-                             alt="..."
-                             style="width: 60px ;height: 60px;">
-                    </a>
+    <div class="col-lg-7" >
+        <div style="height: 600px">
+            {% for article in page_content %}
+                <div class="media">
+                    <div class="media-left media-middle">
+                        <a href="#">
+                            <img class="media-object" src="/media/{{ article.blog.userinfo.avatar }}"
+                                 alt="..."
+                                 style="width: 60px ;height: 60px;">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <a href="/{{ article.blog.userinfo.username }}/article/{{ article.id }}"><h4
+                                class="media-heading">{{ article.title }}</h4></a>
+                        {{ article.desc }}
+                    </div>
+                    <div style="margin-top: 10px " class="article_bottom">
+                        <a href="/{{ article.blog.userinfo.username }}/"><span>作者:{{ article.blog.userinfo.username }}&nbsp;</span></a>
+                        <span>发布时间:{{ article.create_time|date:'Y-m-d H-i-s' }}&nbsp;</span>
+                        <span class="glyphicon glyphicon-comment">评论({{ article.commit_num }})</span>
+                        <span class="glyphicon glyphicon-thumbs-up">点赞({{ article.up_num }})</span>
+                    </div>
                 </div>
-                <div class="media-body">
-                    <a href="/{{ article.blog.userinfo.username }}/article/{{ article.id }}"><h4
-                            class="media-heading">{{ article.title }}</h4></a>
-                    {{ article.desc }}
-                </div>
-                <div style="margin-top: 10px " class="article_bottom">
-                    <a href="/{{ article.blog.userinfo.username }}/"><span>作者:{{ article.blog.userinfo.username }}&nbsp;</span></a>
-                    <span>发布时间:{{ article.create_time|date:'Y-m-d H-i-s' }}&nbsp;</span>
-                    <span class="glyphicon glyphicon-comment">评论({{ article.commit_num }})</span>
-                    <span class="glyphicon glyphicon-thumbs-up">点赞({{ article.up_num }})</span>
-                </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
+
         <div class="row">
             <div class="col-md-offset-3 col-lg-6">
                 <nav aria-label="Page navigation">

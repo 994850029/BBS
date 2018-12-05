@@ -116,7 +116,7 @@ def user_blur(request):
 def index(request):
     if request.method == 'GET':
         articles = models.Article.objects.all().order_by('-create_time')
-        paginator = Paginator(articles, 4)
+        paginator = Paginator(articles, 5)
         try:
             if int(request.GET.get('page')) not in range(1, paginator.num_pages + 1):
                 page_num = 1
