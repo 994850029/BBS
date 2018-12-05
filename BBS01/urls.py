@@ -21,7 +21,7 @@ from BBS01 import settings
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^login/$', views.login),
+    url(r'^login/', views.login),
     url(r'get_img/', views.get_img, name='get_img'),
     url(r'^register/$', views.register),
     url(r'^user_blur/', views.user_blur),
@@ -36,5 +36,11 @@ urlpatterns = [
     url(r'^(?P<username>[\w]+)/article/(?P<id>\d+)',views.article_content),
     url(r'^up_and_down/',views.up_and_down),
     url(r'^commit/',views.commit),
+    url(r'^article_manage/',views.article_manage),
+    url(r'^article_del/',views.article_del),
+    url(r'^article_update/(\d+)',views.article_update,name='article_update'),
+    url(r'^add_article/',views.add_article),
+    url(r'^article_img/',views.article_img),
     url(r'^(?P<username>[\w]+)', views.user_blog),
+    url(r'.*',views.error),
 ]

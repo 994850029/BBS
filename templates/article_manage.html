@@ -1,0 +1,30 @@
+{% extends 'manage_base.html' %}
+{% block article_manage %}
+    <table class="table table-hover table-striped">
+        <thead>
+        <tr>
+            <th>文章标题</th>
+            <th>发布时间</th>
+            <th>评论数</th>
+            <th>点赞数</th>
+            <th>修改</th>
+            <th>删除</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for article in articles %}
+            <tr>
+                <td><a href="/{{ article.blog.userinfo.username }}/article/{{ article.id }}">{{ article.title }}</a></td>
+                <td>{{ article.create_time|date:'Y-m-d H:i:s' }}</td>
+                <td>{{ article.commit_num }}</td>
+                <td>{{ article.up_num }}</td>
+                <td><a href={% url 'article_update' article.id %}>修改</a></td>
+                <td><a href="/article_del/?article_id={{ article.id }}">删除</a></td>
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+{% endblock %}

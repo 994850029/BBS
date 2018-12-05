@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理</title>
+    {% load static %}
+    <script src={% static 'js/jquery-3.3.1.js' %}></script>
+    <script src="/static/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist/css/bootstrap.css">
+</head>
+<style>
+    .head {
+        height: 60px;
+        background: #afd9ee;
+        margin-bottom: 20px;
+    }
+</style>
+<body>
+{% load my_tag %}
+{% header_lan request %}
+<div class="head">
+    <h3 class="text-center" style="line-height: 60px">后台管理</h3>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
+                               aria-expanded="true" aria-controls="collapseOne">
+                                操作
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel"
+                         aria-labelledby="headingOne">
+                        <div class="panel-body">
+                            <a href="/add_article/">添加文章</a>
+                        </div>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel"
+                         aria-labelledby="headingOne">
+                        <div class="panel-body">
+                            <a href="">添加随笔</a>
+                        </div>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel"
+                         aria-labelledby="headingOne">
+                        <div class="panel-body">
+                            <a href="">其他操作</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div>
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab"
+                                                              data-toggle="tab">文章</a></li>
+                    <li role="presentation"><a href="#profile" aria-controls="profile" role="tab"
+                                               data-toggle="tab">随笔</a>
+                    </li>
+                    <li role="presentation"><a href="#messages" aria-controls="messages" role="tab"
+                                               data-toggle="tab">日志</a>
+                    </li>
+                    <li role="presentation"><a href="#settings" aria-controls="settings" role="tab"
+                                               data-toggle="tab">链接</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="home">
+                        {% block article_manage %}
+                        {% endblock %}
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="profile">施工中...</div>
+                    <div role="tabpanel" class="tab-pane" id="messages">施工中...</div>
+                    <div role="tabpanel" class="tab-pane" id="settings">施工中...</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+</body>
+</html>

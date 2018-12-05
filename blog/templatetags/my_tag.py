@@ -20,3 +20,8 @@ def left_fold(username):
         coun=Count('y_m')).values_list('y_m', 'coun')
 
     return {'category_num': category_num, 'tag_num': tag_num, 'y_m_num': y_m_num, 'username': username,'blog':blog}
+
+
+@register.inclusion_tag('heard_lan.html')
+def header_lan(request):
+    return {'request':request}

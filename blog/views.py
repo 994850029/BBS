@@ -14,6 +14,9 @@ from django.db.models import F
 from django.db import transaction
 import json
 from django.core.paginator import Paginator
+from bs4 import BeautifulSoup
+import os
+from BBS01 import settings
 
 # Create your views here.
 def login(request):
@@ -32,7 +35,7 @@ def login(request):
 
         user = auth.authenticate(username=name, password=pwd)
         if user and yzm.upper() == yzm_session.upper():
-            # return HttpResponse(json.dumps('登录成功!'))
+
             auth.login(request, user)
             return JsonResponse(response)
         else:
@@ -89,7 +92,10 @@ def register(request):
                 hs.update(str(time).encode('utf-8'))
                 files.name = hs.hexdigest() + '.png'
                 dic['avatar'] = files
-            models.UserInfo.objects.create_user(**dic)
+            with transaction.atomic():
+                blog = models.Blog.objects.create(title=dic.get('username')+'的博客',site_name=dic.get('username'),theme='3.css')
+                dic['blog'] = blog
+                models.UserInfo.objects.create_user(**dic)
         else:
             response['status'] = 101
             response['msg'] = user.errors
@@ -110,8 +116,7 @@ def user_blur(request):
 def index(request):
     if request.method == 'GET':
         articles = models.Article.objects.all().order_by('-create_time')
-
-        paginator = Paginator(articles,4)
+        paginator = Paginator(articles, 4)
         try:
             if int(request.GET.get('page')) not in range(1, paginator.num_pages + 1):
                 page_num = 1
@@ -120,15 +125,15 @@ def index(request):
         except Exception as e:
             page_num = 1
         page_content = paginator.page(page_num)
-        if paginator.num_pages < 11:
+        if paginator.num_pages < 6:
             page_count = paginator.page_range
         else:
-            if page_num - 5 < 1:
-                page_count = range(1, 12)
-            elif page_num + 6 > paginator.num_pages:
-                page_count = range(paginator.num_pages - 10, paginator.num_pages + 1)
+            if page_num - 3 < 1:
+                page_count = range(1, 6)
+            elif page_num + 3 > paginator.num_pages:
+                page_count = range(paginator.num_pages - 4, paginator.num_pages + 1)
             else:
-                page_count = range(page_num - 5, page_num + 6)
+                page_count = range(page_num - 2, page_num + 3)
 
         return render(request, 'index.html', locals())
 
@@ -209,7 +214,7 @@ def user_blog(request, username, *args, **kwargs):
         time_list = kwargs.get('id').split('-')
         article_list = article_list.filter(create_time__year=time_list[0], create_time__month=time_list[1])
     category_num = models.Category.objects.filter(blog=blog).all().annotate(coun=Count('article__title')).values_list(
-        'title', 'coun','id')
+        'title', 'coun', 'id')
     tag_num = models.Tag.objects.filter(blog=blog).all().annotate(coun=Count('article__title')).values_list('title',
                                                                                                             'coun',
                                                                                                             'id')
@@ -218,37 +223,39 @@ def user_blog(request, username, *args, **kwargs):
         coun=Count('y_m')).values_list('y_m', 'coun')
     return render(request, 'user_blog.html', locals())
 
-def article_content(request,username,id):
+
+def article_content(request, username, id):
     username = username
     user = models.UserInfo.objects.filter(username=username).first()
     if not user:
-        return render(request,'error.html')
-    blog=user.blog
+        return render(request, 'error.html')
+    blog = user.blog
     article = models.Article.objects.filter(id=id).first()
     if not article:
-        return render(request,'error.html')
-    content_list = models.Commit.objects.filter(article = article).all()
-    return render(request,'article_content.html',locals())
+        return render(request, 'error.html')
+    content_list = models.Commit.objects.filter(article=article).all()
+    return render(request, 'article_content.html', locals())
+
 
 @login_required
 def up_and_down(request):
     dic = request.POST
-    response = {'status':100,'msg':None}
+    response = {'status': 100, 'msg': None}
     article_id = dic.get('article_id')
     is_up = dic.get('is_up')
     is_up = json.loads(is_up)
     if request.user.is_authenticated():
-        user_cf = models.UpAndDown.objects.filter(user=request.user,article_id=article_id).first()
+        user_cf = models.UpAndDown.objects.filter(user=request.user, article_id=article_id).first()
         if user_cf:
-            response['msg'] ='无法多次点赞或者点踩哦!'
+            response['msg'] = '无法多次点赞或者点踩哦!'
             response['status'] = 101
             return JsonResponse(response)
         else:
             with transaction.atomic():
-                models.UpAndDown.objects.create(user=request.user,article_id=article_id,is_up=is_up)
-                article =models.Article.objects.filter(id = article_id)
+                models.UpAndDown.objects.create(user=request.user, article_id=article_id, is_up=is_up)
+                article = models.Article.objects.filter(id=article_id)
             if is_up:
-                article.update(up_num = F('up_num')+1)
+                article.update(up_num=F('up_num') + 1)
                 response['status'] = 100
                 response['msg'] = '您已成功点赞!'
             else:
@@ -256,11 +263,11 @@ def up_and_down(request):
                 response['status'] = 100
                 response['msg'] = '您已成功反对!'
     else:
-        response['status']=101
+        response['status'] = 101
         response['msg'] = '请先登录!'
     return JsonResponse(response)
 
-@login_required
+
 def commit(request):
     if request.is_ajax():
         response = {'status': 100, 'msg': None}
@@ -271,11 +278,12 @@ def commit(request):
             article_id = dic.get('article_id')
             content = dic.get('content')
             with transaction.atomic():
-                commit_obj = models.Commit.objects.create(content=content,article_id=article_id,parent_id=parent_id,user=user)
-                models.Article.objects.filter(id = article_id).update(commit_num = F('commit_num')+1)
-            response['time'] =commit_obj.commit_time.strftime('%Y-%m-%d %X')
+                commit_obj = models.Commit.objects.create(content=content, article_id=article_id, parent_id=parent_id,
+                                                          user=user)
+                models.Article.objects.filter(id=article_id).update(commit_num=F('commit_num') + 1)
+            response['time'] = commit_obj.commit_time.strftime('%Y-%m-%d %X')
             response['content'] = commit_obj.content
-            response['username'] =commit_obj.user.username
+            response['username'] = commit_obj.user.username
             response['msg'] = '评论成功!'
             if parent_id:
                 # 如果是字评论,返回父评论的名字
@@ -285,3 +293,81 @@ def commit(request):
             response['status'] = 101
             response['msg'] = '您的请求非法'
         return JsonResponse(response)
+
+
+@login_required
+def article_manage(request):
+    if request.method == 'GET':
+        user = request.user
+        articles = models.Article.objects.filter(blog=user.blog).all()
+        return render(request, 'article_manage.html', locals())
+
+
+def article_del(request):
+    if request.user.is_authenticated():
+        article_id = request.GET.get('article_id')
+        models.Article.objects.filter(id=article_id).delete()
+        return redirect('/article_manage/')
+    else:
+        return redirect('/error/')
+
+
+@login_required
+def add_article(request):
+    if request.user.is_authenticated():
+        if request.method == 'GET':
+            return render(request,'add_article.html')
+        if request.method =='POST':
+            title = request.POST.get('title')
+            content = request.POST.get('content')
+            content_bs = BeautifulSoup(content,'html.parser')
+            tags = content_bs.find_all()
+            for tag in tags:
+                if tag.name == 'script':
+                    tag.decompose()
+            desc = content_bs.text[:100]+'...'
+            models.Article.objects.create(title=title,desc=desc,content=str(content_bs),blog=request.user.blog)
+            return redirect('/article_manage/')
+    else:
+        return redirect('/error/')
+
+
+def article_img(request):
+    if request.user.is_authenticated():
+        img = request.FILES.get('myfile')
+        path = os.path.join(settings.BASE_DIR,'media','img')
+        if not os.path.isdir(path):
+            os.mkdir(path)
+        hs = hashlib.md5()
+        time =datetime.datetime.now()
+        msg = str(time)+img.name
+        hs.update(msg.encode('utf-8'))
+        img_name = hs.hexdigest()+'.png'
+        img_path = os.path.join(path, img_name)
+        with open(img_path,'wb') as f:
+            for file in img:
+                f.write(file)
+        dic = {'error': 0, 'url': '/media/img/%s' % img_name}
+        return JsonResponse(dic)
+    else:
+        return redirect('/error/')
+
+@login_required
+def article_update(request,article_id):
+    if request.user.is_authenticated():
+        if request.method == 'GET':
+            article = models.Article.objects.filter(id=article_id).first()
+            return render(request, 'article_update.html',locals())
+        if request.method == 'POST':
+            title = request.POST.get('title')
+            content = request.POST.get('content')
+            content_bs = BeautifulSoup(content, 'html.parser')
+            tags = content_bs.find_all()
+            for tag in tags:
+                if tag.name == 'script':
+                    tag.decompose()
+            desc = content_bs.text[:100] + '...'
+            models.Article.objects.filter(id=article_id).update(title=title, desc=desc, content=str(content_bs))
+            return redirect('/article_manage/')
+    else:
+        return redirect('/error/')
