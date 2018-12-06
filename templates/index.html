@@ -126,57 +126,5 @@
 
 
 <!-- Modal -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title" id="myModalLabel">修改头像</h4>
-            </div>
-            <div class="modal-body">
-                <label for="update_img">
-                    <p>点击修改头像</p>
-                    <img id="change_img" src="/media/{{ request.user.avatar }}" alt=""
-                         style="width: 540px;height: 300px">
-                </label>
-
-                <input type="file" id="update_img">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary" id="btn_imgupdate">确认并保存</button>
-            </div>
-        </div>
-    </div>
-</div>
 </body>
-<script>
-    $('#update_img').change(function () {
-        var file = $('#update_img')[0].files[0];
-        var filereader = new FileReader();
-        filereader.readAsDataURL(file);
-        filereader.onload = function () {
-            $('#change_img').attr('src', filereader.result)
-        }
-    });
-    $('#btn_imgupdate').click(function () {
-        console.log(111);
-        var file = $('#update_img')[0].files[0];
-        var formdate = new FormData();
-        formdate.append('img', file);
-        formdate.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-        $.ajax({
-            url: '/img_update/',
-            type: 'post',
-            processData: false,
-            contentType: false,
-            data: formdate,
-            success: function (data) {
-                location.href = '/index/'
-            }
-        })
-
-    })
-</script>
 </html>

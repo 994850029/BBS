@@ -140,3 +140,13 @@ AUTH_USER_MODEL = 'blog.UserInfo'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+EMAIL_HOST = 'smtp.qq.com'  # 如果是 163 改成 smtp.163.com
+#端口号
+EMAIL_PORT = 465
+EMAIL_HOST_USER = '2592447400@qq.com'  # 帐号
+EMAIL_HOST_PASSWORD = 'kpfdpjeowccqdhhd'  # 密码
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+#这样收到的邮件，收件人处就会这样显示
+#DEFAULT_FROM_EMAIL = 'lqz<'306334678@qq.com>'
+EMAIL_USE_SSL = True   #使用ssl

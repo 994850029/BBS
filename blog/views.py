@@ -17,6 +17,9 @@ from django.core.paginator import Paginator
 from bs4 import BeautifulSoup
 import os
 from BBS01 import settings
+from threading import Thread
+from django.core.mail import send_mail
+
 
 # Create your views here.
 def login(request):
@@ -64,15 +67,6 @@ def get_img(request):
     return HttpResponse(data)
 
 
-def get_img_test(request):
-    img = Image.new('RGB', (300, 30), (255, 255, 255))
-    font = ImageFont.truetype(font='static/font/txt.TTF', size=24)
-    img_draw = ImageDraw.Draw(img)
-    font_content = common.get_random_yzm(5)
-    img_draw.text((100, 0), font_content, common.get_random_color(), font=font)
-    common.add_dianxiang(300, 30, img_draw, 5, 50)
-
-
 def register(request):
     if request.method == 'GET':
         forms = common.RegisterForm()
@@ -93,7 +87,8 @@ def register(request):
                 files.name = hs.hexdigest() + '.png'
                 dic['avatar'] = files
             with transaction.atomic():
-                blog = models.Blog.objects.create(title=dic.get('username')+'的博客',site_name=dic.get('username'),theme='3.css')
+                blog = models.Blog.objects.create(title=dic.get('username') + '的博客', site_name=dic.get('username'),
+                                                  theme='3.css')
                 dic['blog'] = blog
                 models.UserInfo.objects.create_user(**dic)
         else:
@@ -182,18 +177,23 @@ def set_re_password(request):
     return JsonResponse(response)
 
 
-@login_required
 def img_update(request):
-    file = request.FILES.get('img')
-    if file:
-        hs = hashlib.md5()
-        time = datetime.datetime.now()
-        hs.update(str(time).encode('utf-8'))
-        file.name = hs.hexdigest() + '.png'
-    user = models.UserInfo.objects.filter(id=request.user.id).first()
-    user.avatar = file
-    user.save()
-    return JsonResponse({'sa': 'afd'})
+    if request.user.is_authenticated():
+        file = request.FILES.get('img')
+        if file:
+            hs = hashlib.md5()
+            time = datetime.datetime.now()
+            hs.update(str(time).encode('utf-8'))
+            file.name = hs.hexdigest() + '.png'
+        user = models.UserInfo.objects.filter(id=request.user.id).first()
+        # 删除原来的头像
+        path = os.path.join(settings.MEDIA_ROOT, 'avatar', str(user.avatar).split('/')[1])
+        os.remove(path)
+        user.avatar = file
+        user.save()
+        return JsonResponse({'status': 100})
+    else:
+        return JsonResponse({'status': 101})
 
 
 def error(request):
@@ -284,6 +284,9 @@ def commit(request):
             response['time'] = commit_obj.commit_time.strftime('%Y-%m-%d %X')
             response['content'] = commit_obj.content
             response['username'] = commit_obj.user.username
+            # mail = Thread(target=send_mail,args=('您的文章被评论了','评论的内容测试',settings.EMAIL_HOST_USER,['zhoujianhao1996@foxmail.com']))
+            # mail.start()
+
             response['msg'] = '评论成功!'
             if parent_id:
                 # 如果是字评论,返回父评论的名字
@@ -316,17 +319,17 @@ def article_del(request):
 def add_article(request):
     if request.user.is_authenticated():
         if request.method == 'GET':
-            return render(request,'add_article.html')
-        if request.method =='POST':
+            return render(request, 'add_article.html')
+        if request.method == 'POST':
             title = request.POST.get('title')
             content = request.POST.get('content')
-            content_bs = BeautifulSoup(content,'html.parser')
+            content_bs = BeautifulSoup(content, 'html.parser')
             tags = content_bs.find_all()
             for tag in tags:
                 if tag.name == 'script':
                     tag.decompose()
-            desc = content_bs.text[:100]+'...'
-            models.Article.objects.create(title=title,desc=desc,content=str(content_bs),blog=request.user.blog)
+            desc = content_bs.text[:100] + '...'
+            models.Article.objects.create(title=title, desc=desc, content=str(content_bs), blog=request.user.blog)
             return redirect('/article_manage/')
     else:
         return redirect('/error/')
@@ -335,16 +338,16 @@ def add_article(request):
 def article_img(request):
     if request.user.is_authenticated():
         img = request.FILES.get('myfile')
-        path = os.path.join(settings.BASE_DIR,'media','img')
+        path = os.path.join(settings.BASE_DIR, 'media', 'img')
         if not os.path.isdir(path):
             os.mkdir(path)
         hs = hashlib.md5()
-        time =datetime.datetime.now()
-        msg = str(time)+img.name
+        time = datetime.datetime.now()
+        msg = str(time) + img.name
         hs.update(msg.encode('utf-8'))
-        img_name = hs.hexdigest()+'.png'
+        img_name = hs.hexdigest() + '.png'
         img_path = os.path.join(path, img_name)
-        with open(img_path,'wb') as f:
+        with open(img_path, 'wb') as f:
             for file in img:
                 f.write(file)
         dic = {'error': 0, 'url': '/media/img/%s' % img_name}
@@ -352,12 +355,13 @@ def article_img(request):
     else:
         return redirect('/error/')
 
+
 @login_required
-def article_update(request,article_id):
+def article_update(request, article_id):
     if request.user.is_authenticated():
         if request.method == 'GET':
             article = models.Article.objects.filter(id=article_id).first()
-            return render(request, 'article_update.html',locals())
+            return render(request, 'article_update.html', locals())
         if request.method == 'POST':
             title = request.POST.get('title')
             content = request.POST.get('content')
